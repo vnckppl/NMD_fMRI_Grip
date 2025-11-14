@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # * Install prerequisites for compiling BayesfMRI in R
 
 # ** For 'sf'

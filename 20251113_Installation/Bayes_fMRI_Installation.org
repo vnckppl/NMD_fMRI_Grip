@@ -1,5 +1,6 @@
 #+TITLE: Installing Bayes fMRI on Ubuntu 24.04
-#+PROPERTY: header-args:bash :tangle scripts/Bayes_fMRI_Installation_01.sh
+#+PROPERTY: header-args:bash  :tangle scripts/Bayes_fMRI_Installation_01.sh
+#+PROPERTY: header-args:bash+ :shebang "#!/usr/bin/env bash"
 #+PROPERTY: header-args:R :tangle scripts/Bayes_fMRI_Installation_02.R
 #+PROPERTY: header-args+ :mkdirp yes
 
