@@ -9,6 +9,9 @@ install.packages("INLA",
                  dep = FALSE
                  )
 
+## * Install INLA binaries
+INLA::inla.binary.install()
+
 ## * Load Libraries
 library("ciftiTools")
 library("BayesfMRI")
