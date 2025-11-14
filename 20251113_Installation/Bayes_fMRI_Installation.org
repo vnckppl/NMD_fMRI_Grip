@@ -1,0 +1,56 @@
+#+TITLE: Installing Bayes fMRI on Ubuntu 24.04
+#+PROPERTY: header-args:bash :tangle scripts/Bayes_fMRI_Installation_01.sh
+#+PROPERTY: header-args:R :tangle scripts/Bayes_fMRI_Installation_02.R
+#+PROPERTY: header-args+ :mkdirp yes
+
+* Source
+Github: [[https://github.com/mandymejia/BayesfMRI][Bayes fMRI]]
+
+* Install prerequisites
+#+begin_src bash
+# * Install prerequisites for compiling BayesfMRI in R
+
+# ** For 'sf'
+sudo apt-get install -y \
+     libudunits2-dev \
+     libgdal-dev \
+     libgeos-dev \
+     libproj-dev
+
+# ** For 'excursions'
+sudo apt-get install -y libgsl-dev
+#+end_src
+
+* Install BayesfMRI
+This took about 5 minutes.
+#+begin_src R
+## * Install packages
+# sf and excursions are prerquisites for BayesfMRI
+install.packages(c("sf", "excursions", "BayesfMRI"))
+#+end_src
+
+* Install INLA
+#+begin_src R
+## * Install INLA
+install.packages("INLA",
+                 repos = c(getOption("repos"),
+                           INLA = "https://inla.r-inla-download.org/R/stable"),
+                 dep = FALSE
+                 )
+
+## * Install INLA binaries
+INLA::inla.binary.install()
+#+end_src
+
+* Check installation
+#+begin_src R
+## * Load Libraries
+library("ciftiTools")
+library("BayesfMRI")
+library("INLA")
+
+## * Set Workbench installation location for ciftiTools
+ciftiTools.setOption(
+  "wb_path","~/Software/workbench/2.1.0/bin_linux64"
+)
+#+end_src
