@@ -1,1 +1,3 @@
 #+TITLE: Processing and Analysis of Neuro-Motor Depression task-fMRI Data
+
+Processing of the Neuro Motor Depression study sample to identify differences in primary motor cortex activation during a hand clench task between individuals with depression and those never diagnosed with depression.
