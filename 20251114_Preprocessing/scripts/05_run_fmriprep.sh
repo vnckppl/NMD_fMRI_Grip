@@ -43,7 +43,7 @@ for sub in ${subjects[@]}; do
 	#SBATCH --partition=koppelmans-shared-np
 	#SBATCH --job-name=${sub//sub-/}_fmriprep
 	#SBATCH --nodes=1
-	#SBATCH --ntasks=16
+	#SBATCH --ntasks=12
 	#SBATCH --mem=64G
 	#SBATCH --time=24:00:00
 	#SBATCH -o log_${sub}_fmriprep-%j.out-%N
@@ -83,14 +83,12 @@ for sub in ${subjects[@]}; do
 	   /out \\
 	   participant \\
 	   --participant-label \${sub} \\
+	   --output-spaces MNI152NLin6Asym:res-2 \\
 	   --cifti-output 91k \\
-	   --output-spaces MNI152NLin6Asym \\
-	   --output-spaces fsaverage \\
-	   --output-spaces func \\
 	   --notrack \\
 	   --fs-license-file /license.txt \\
 	   --skip_bids_validation \\
-	   --nprocs 32 \\
+	   --nprocs 12 \\
 	   --fs-subjects-dir /out/\${sub}/freesurfer \\
 	   --work-dir="\${workdir}" \\
 	   --clean-workdir \\
