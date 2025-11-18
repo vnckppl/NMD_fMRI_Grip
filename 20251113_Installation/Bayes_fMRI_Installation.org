@@ -27,7 +27,7 @@ This took about 5 minutes.
 #+begin_src R
 ## * Install packages
 # sf and excursions are prerquisites for BayesfMRI
-install.packages(c("sf", "excursions", "BayesfMRI"))
+install.packages(c("sf", "excursions", "BayesfMRI", "hrf"))
 #+end_src
 
 * Install INLA
