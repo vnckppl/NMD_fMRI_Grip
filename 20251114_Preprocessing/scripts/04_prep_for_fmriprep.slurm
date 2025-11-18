@@ -20,6 +20,7 @@ base="/uufs/chpc.utah.edu/common/home/koppelmans-group1/20230809_Kladblok\
 idir="${base}/20240715_BIDS"
 odir="${base}/20251114_BIDS_prepped"
 mkdir -p "${odir}"
+fixjson="${odir}/scripts/fix_json.py"
 
 
 # * Load FSL module
@@ -139,6 +140,12 @@ for sub in ${subjects[@]}; do
         "${andir_i}/${sub}_ses-01_rec-bias_T2w.json" \
         "${andir_o}/${sub}_ses-01_T2w.json"
 
+    # ** Link the reversed-phase encoding images to the fMRI data
+    python3 \
+        "${fixjson}" \
+        --sid "${sub//sub-/}" \
+        --ses "01" \
+        --path "${odir}"
 done
 
 

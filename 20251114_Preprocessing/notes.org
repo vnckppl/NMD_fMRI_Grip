@@ -195,6 +195,145 @@ exit
 <<lr_flip_brain_nmd004>>
 #+end_src
 
+* Python function to populate the intended for fields.
+:PROPERTIES:
+:header-args:python: :tangle no
+:END:
+
+This is necessary to ensure that fMRIprep will recognize the AP/PA maps to unwarp the fMRI data.
+
+#+NAME: populate_intended_for
+#+begin_src python
+# * Libraries
+import argparse
+from glob import glob
+import json
+from shutil import copy2
+
+
+# * Import arguments
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description='Populate fieldmap json files intended for fields'
+    )
+    parser.add_argument('--sid', required=True, help='Subject ID.')
+    parser.add_argument('--ses', required=True, help='Session ID.')
+    parser.add_argument('--path', required=True, help='Root folder containing subject folders')
+    # ** Parse arguments
+    args = parser.parse_args()
+
+
+# * Create class for patching
+class fixjson:
+    def __init__(self, sid, ses, path):
+
+        # ** Store input arguments
+        self.subid = str(sid)
+        self.sesid = str(ses)
+        self.base = path
+
+        # ** Build paths
+        self.idir = self.base + "/sub-" + self.subid + "/ses-" + self.sesid
+        self.idir_func = self.idir + "/func"
+        self.idir_fmap = self.idir + "/fmap"
+
+    # ** Locate funtional data
+    def locate_nii(self, sequence):
+        # *** Find the nifti data paths
+        self.niis = sorted(glob(self.idir_func + f"/*{sequence}*nii.gz"))
+        # *** Remove root + subject path from these paths
+        self.niis = [
+            x.replace(self.base + "/sub-" + self.subid + "/", "")
+            for x in self.niis
+        ]
+        return self.niis
+
+    # ** Locate field map json files
+    # This should bring up exactly two files: AP and PA for a particular sequence
+    def locate_json(self, sequence):
+        # *** Find the json data paths
+        self.json = sorted(glob(self.idir_fmap + f"/*{sequence}*json"))
+        return self.json
+
+    # ** Loop over json files and inject 'intended for' relative path
+    def doinject(self, sequence):
+
+        # *** Loop over the json AP/PA images
+        for my_json in self.locate_json(sequence):
+
+            # **** Create backup
+            # file_bkp = my_json.replace("json", "json_bkp")
+            # copy2(my_json, file_bkp)
+
+            # **** Load json file
+            with open(my_json) as json_file:
+                self.tmp_json = json.load(json_file)
+
+                # ***** Announce
+                print(f"Populating IntendedFor field of {my_json.split('/')[-1]} with {self.locate_nii(sequence)[0]}")
+
+                # ***** Inject fMRI path into 'intended for' field
+                self.tmp_json['IntendedFor'] = self.locate_nii(sequence)
+
+            # **** Save the edited json over the original file
+            with open(my_json, "w") as write_file:
+                json.dump(self.tmp_json, write_file, indent=4)
+
+
+# * Apply patch
+# ** Test
+# my_fix_object = fixjson("NMD001", "01", "/datadisk/tmp/NMD")
+# for sequence in ['handdom', 'rest']:
+#     my_fix_object.doinject(sequence)
+
+# ** Production
+my_fix_object = fixjson(args.sid, args.ses, args.path)
+for sequence in ['handdom', 'rest']:
+    my_fix_object.doinject(sequence)
+#+end_src
+
+Test
+#+begin_src bash :tangle no
+# * Load the virtual environment
+source "${HOME}/Software/syspyvenv/bin/activate"
+
+# * Environment
+script="/datadisk/Utah/Kladblok/20201120_Margolis_NMD/20220504_Data_Processing\
+/20251113_BayesfMRI/20251114_Preprocessing/scripts/04_fix_json.py"
+dir="/datadisk/tmp/NMD"
+
+# * Environment
+python3 \
+    "${script}" \
+    --sid "NMD001" \
+    --ses "01" \
+    --path "${dir}"
+#+end_src
+
+** TANGLE (local) :noexport:
+:PROPERTIES:
+:header-args:python:  :shebang "#!/usr/bin/env python"
+:header-args:python+: :tangle scripts/04_fix_json.py
+:header-args:python+: :mkdirp yes
+:header-args:python+: :noweb yes
+:END:
+
+#+begin_src python
+<<populate_intended_for>>
+#+end_src
+
+** TANGLE (CHPC) :noexport:
+:PROPERTIES:
+:header-args:python:  :shebang "#!/usr/bin/env python"
+:header-args:python+: :tangle  /ssh:u6012627@notchpeak.chpc.utah.edu:/uufs/chpc.utah.edu/common/home/koppelmans-group1/20230809_Kladblok/20251114_NMD_fMRI/20251114_BIDS_prepped/scripts/fix_json.py
+:header-args:python+: :mkdirp yes
+:header-args:python+: :noweb yes
+:END:
+
+#+begin_src python
+<<populate_intended_for>>
+#+end_src
+
 * Prepare dataset for fMRIprep
 :PROPERTIES:
 :header-args:bash: :tangle no
@@ -252,6 +391,7 @@ base="/uufs/chpc.utah.edu/common/home/koppelmans-group1/20230809_Kladblok\
 idir="${base}/20240715_BIDS"
 odir="${base}/20251114_BIDS_prepped"
 mkdir -p "${odir}"
+fixjson="${odir}/scripts/fix_json.py"
 
 
 # * Load FSL module
@@ -371,6 +511,12 @@ for sub in ${subjects[@]}; do
         "${andir_i}/${sub}_ses-01_rec-bias_T2w.json" \
         "${andir_o}/${sub}_ses-01_T2w.json"
 
+    # ** Link the reversed-phase encoding images to the fMRI data
+    python3 \
+        "${fixjson}" \
+        --sid "${sub//sub-/}" \
+        --ses "01" \
+        --path "${odir}"
 done
 
 
