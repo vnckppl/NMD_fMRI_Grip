@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 #SBATCH --account=owner-guest
 #SBATCH --mail-user=u6012627@utah.edu
-#SBATCH --partition=notchpeak-shared-guest
+#SBATCH --partition=koppelmans-shared-np
 #SBATCH --job-name=run_mriqc
 #SBATCH --nodes=1
-#SBATCH --ntasks=32
-#SBATCH --mem=64G
-#SBATCH --time=16:00:00
+#SBATCH --ntasks=96
+#SBATCH --mem=1024G
+#SBATCH --time=48:00:00
 #SBATCH -o run_mriqc_sif-%j.out-%N
 #SBATCH -e run_mriqc_sif-%j.err-%N
 
