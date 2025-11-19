@@ -907,4 +907,14 @@ rsync \
     "${ldir}"/
 
 # ** MRIQC
+rsync \
+    --include="*/" \
+    --include="*.html" \
+    --include="*.svg" \
+    --include="*.json" \
+    --include="*.tsv" \
+    --exclude="*" \
+    -avmhe ssh \
+    "${rid}@${rip}:${rdir}/20251116_MRIQC/mriqc_25.0.0rc0" \
+    "${ldir}"/
 #+end_src
