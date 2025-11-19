@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#SBATCH --account=owner-guest
+#SBATCH --account=koppelmans-np
 #SBATCH --mail-user=u6012627@utah.edu
 #SBATCH --partition=koppelmans-shared-np
 #SBATCH --job-name=run_mriqc
@@ -18,6 +18,7 @@ mriqc="${base}/20230809_Software/SingularityImages/mriqc-${mriqc_version}.simg"
 # ** IO paths
 idir="${base}/20230809_Kladblok/20251114_NMD_fMRI/20251114_BIDS_prepped"
 odir="${base}/20230809_Kladblok/20251114_NMD_fMRI/20251116_MRIQC/mriqc_${mriqc_version}"
+wdir="${base}/20230809_Kladblok/20251114_NMD_fMRI/20251116_MRIQC/scripts/work"
 mkdir -p "${odir}"
 
 
@@ -26,6 +27,7 @@ module load apptainer
 
 
 # * Run MRIQC
+# ** Participant Level
 apptainer \
    run \
    --cleanenv \
@@ -42,5 +44,23 @@ apptainer \
    --no-sub \
    --notrack
 
+# ** Group Level
+apptainer \
+   run \
+   --cleanenv \
+   --bind "${idir}":/data:ro \
+   --bind "${odir}":/out \
+   ${mriqc} \
+   /data \
+   /out \
+   group \
+   --nprocs 32 \
+   --omp-nthreads 32 \
+   --no-sub \
+   --notrack
+
+
+# * Clean up
+rm -rf "${wdir}"
 
 exit
