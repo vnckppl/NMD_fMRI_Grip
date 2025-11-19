@@ -239,10 +239,6 @@ plot_design(plotdata, method = "lineplot")
 (dev.off())
 
 
-
-CONTINUE BELOW 2025-11-17
-
-
 ## * Build contrast
 # We are not interested in average activation during a condition, but in
 # in the contarst 'squeeze' vs. 'crosshair'. Create this design here.
@@ -388,6 +384,11 @@ for (c in contrasts) {
 
 ## * Export results to cifti, gifti, and nifti files
 # Potentially, I could aslo use write_xifti2() for this.
+
+
+### -> Having some error here with writing out. Have contacted Damon.
+
+
 ## ** Export cifti file
 ofile_cii <- file.path(odir_a, paste0(sub, "_bglm_1st_level.dlabel.nii"))
 write_cifti(
