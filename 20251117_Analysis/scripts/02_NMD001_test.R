@@ -1,45 +1,4 @@
-#+TITLE: Analyze NMD Hand Clench Brain Activation With BayesfMRI
-#+PROPERTY: header-args :tangle no
-
-* Copy Data for Local Processing
-:PROPERTIES:
-:header-args:bash:  :tangle scripts/01_copy_1st_level_data.sh
-:header-args:bash+: :shebang "#!/usr/bin/env bash"
-:header-args:bash+: :mkdirp yes
-:END:
-
-#+begin_src bash
-# * Environment
-rid="u6012627"
-rip="notchpeak.chpc.utah.edu"
-rdir="/uufs/chpc.utah.edu/common/home/koppelmans-group1/20230809_Kladblok\
-/20251114_NMD_fMRI/20251115_fMRIprep/derivatives/fMRIPrep_25.2.3"
-ldir="/datadisk/tmp/20251119_NMD_ClenchTask/data"
-mkdir -p "${ldir}"
-
-
-# * Copy over the data
-rsync \
-    --include="*/" \
-    --include="*_ses-01_task-handdom_desc-confounds_timeseries.tsv" \
-    --include="*_ses-01_task-handdom_space-fsLR_den-91k_bold.dtseries.nii" \
-    --exclude="*" \
-    -avmhe ssh \
-    "${rid}@${rip}:${rdir}/**/ses-01/func/" \
-    "${ldir}"/
-#+end_src
-
-* Develop Pipeline on a Single Subject
-:PROPERTIES:
-:header-args:R:  :shebang "#!/usr/bin/env Rscript"
-:header-args:R+: :tangle scripts/02_NMD001_test.R
-:header-args:R+: :mkdirp yes
-:header-args:R+: :noweb yes
-:END:
-
-Running Bayes fMRI on a single subject for testing and script development.
-
-#+begin_src R
+#!/usr/bin/env Rscript
 ## * Environment
 base <- "/datadisk/tmp/20251119_NMD"
 sub <- "sub-NMD001"
@@ -402,4 +361,3 @@ separate_cifti(
     brainstructures = "all",
     write_dir = odir_a
 )
-#+end_src
