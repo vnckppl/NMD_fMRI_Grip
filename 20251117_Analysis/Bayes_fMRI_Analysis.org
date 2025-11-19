@@ -41,10 +41,10 @@ Running Bayes fMRI on a single subject for testing and script development.
 
 #+begin_src R
 ## * Environment
-base <- "/datadisk/tmp/20251119_NMD"
+base <- "/datadisk/tmp/20251119_NMD_ClenchTask"
 sub <- "sub-NMD001"
-idir <- file.path(base, "fMRIPrep_25.2.3", sub, "ses-01/func")
-odir <- file.path(base, "20251117_1stlevel", sub)
+idir <- file.path(base, "data")
+odir <- file.path(base, "2025111_1stlevel_test", sub)
 dir.create(odir, showWarnings = FALSE, recursive = TRUE)
 
 ## ** Folder for design related files
@@ -112,16 +112,16 @@ plot_spm_design <- function(spikes, nuisances, filename) {
 ## * Setup design matrix
 ## ** Timings and duration for hand clenching
 clench <- data.frame(
-  V1 = c(10, 55, 100, 145, 190, 235),
-  V2 = rep(30, 6),
-  V3 = rep(1, 6)
+  start = c(10, 55, 100, 145, 190, 235),
+  duration = rep(30, 6),
+  idk = rep(1, 6)
 )
 
 ## ** Timings and duration for rest (just looking at crosshair)
 crosshair <- data.frame(
-  V1 = c(0, 40, 85, 130, 175, 220, 265),
-  V2 = rep(15, 7),
-  V3 = rep(1, 7)
+  start = c(0, 40, 85, 130, 175, 220, 265),
+  duration = rep(15, 7),
+  idk = rep(1, 7)
 )
 
 ## ** Combine into list
@@ -284,11 +284,11 @@ system.time(
     brainstructures = c("sub", "left", "right"),
     subROI = subcortical_rois,
     TR = reptime,
-    nuisance = nuisance,
+    nuisance = nuisances,
     scrub = grepl(1, rowSums(spikes)),
     scale_BOLD = "mean",
-    surfL="fs_LR",
-    surfR="fs_LR",
+    surfL = "fs_LR",
+    surfR = "fs_LR",
     hpf = .01,
     nbhd_order = 1,
     ar_order = 3,
@@ -321,7 +321,7 @@ for (c in contrasts) {
 ## * Export results to cifti, gifti, and nifti files
 # Potentially, I could aslo use write_xifti2() for this.
 ## ** Export cifti file
-ofile_cii <- file.path(odir_b, paste0(sub, "_bglm_1st_level.func.nii"))
+ofile_cii <- file.path(odir_b, paste0(sub, "_bglm_1st_level.dscalar.nii"))
 write_cifti(
     bglm$estimate_xii$Bayes$single_sess,
     cifti_fname = ofile_cii,
