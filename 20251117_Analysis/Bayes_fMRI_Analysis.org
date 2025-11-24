@@ -383,16 +383,45 @@ for (c in contrasts) {
 
 
 ## * Export results to cifti, gifti, and nifti files
-# Potentially, I could aslo use write_xifti2() for this.
+# Had some error here with writing out. Have contacted Damon:
+# "So the activations result does have NA values in the left and right cortex. I
+# wonder if the explanation is simply that the BayesfMRI result had NA
+# locations, like from the data being NA or low-variance. One quick solution is
+# to change those values to 0, which corresponds to the un-activated label. But
+# if you want to preserve a separation of the NA values, you could define a new
+# label like what the error message is suggesting"
+replace_NA_with_label <- function(xii, NA_value=-1, NA_label="NA", NA_color="#FFFFFFFF") {
+  stopifnot(is.xifti(xii))
 
+  # Make new row for NA label
+  col_table <- col2rgb(NA_color, alpha=TRUE)/255
+  col_table <- rbind(NA_value, col_table)
+  rownames(col_table) <- c("Key", "Red", "Green", "Blue", "Alpha")
+  col_table <- as.data.frame(t(col_table))
+  rownames(col_table) <- NA_label
 
-### -> Having some error here with writing out. Have contacted Damon.
+  # Add this row to each label table
+  nC <- ncol(xii)
+  for (cc in seq(nC)) {
+    stopifnot(!(NA_value %in% c(xii$meta$cifti$labels[[cc]]$Key)))
+    xii$meta$cifti$labels[[cc]] <- rbind(
+      col_table, xii$meta$cifti$labels[[cc]]
+    )
+  }
 
+  # Replace NA values with the new value
+  q <- as.matrix(xii)
+  q[is.na(q)] <- NA_value
+  xii <- newdata_xifti(xii, q)
+
+  stopifnot(is.xifti(xii))
+  xii
+}
 
 ## ** Export cifti file
 ofile_cii <- file.path(odir_a, paste0(sub, "_bglm_1st_level.dlabel.nii"))
 write_cifti(
-    act$activations_xii$single_sess,
+    replace_NA_with_label(act$activations_xii$single_sess),
     cifti_fname = ofile_cii,
     verbose = TRUE
 )
