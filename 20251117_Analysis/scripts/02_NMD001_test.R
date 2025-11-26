@@ -1,9 +1,9 @@
 #!/usr/bin/env Rscript
 ## * Environment
 base <- "/datadisk/tmp/20251119_NMD_ClenchTask"
-sub <- "sub-NMD001"
+subj <- "sub-NMD001"
 idir <- file.path(base, "data")
-odir <- file.path(base, "2025111_1stlevel_test", sub)
+odir <- file.path(base, "2025111_1stlevel_test", subj)
 dir.create(odir, showWarnings = FALSE, recursive = TRUE)
 
 ## ** Folder for design related files
@@ -90,7 +90,7 @@ events <- list(clench = clench, crosshair = crosshair)
 ## * Prepare Regressors
 regressors <- read.csv(
   file.path(
-    idir, paste0(sub, "_ses-01_task-handdom_desc-confounds_timeseries.tsv")),
+    idir, paste0(subj, "_ses-01_task-handdom_desc-confounds_timeseries.tsv")),
   header = TRUE, sep = "	"
 )
 
@@ -140,7 +140,7 @@ write.table(
 ## ** Define file paths
 fname_bold <- file.path(
   idir, paste0(
-  sub, "_ses-01_task-handdom_space-fsLR_den-91k_bold.dtseries.nii"
+  subj, "_ses-01_task-handdom_space-fsLR_den-91k_bold.dtseries.nii"
 ))
 
 ## ** Read in data
@@ -234,6 +234,38 @@ subcortical_rois <- c(
 )
 
 
+## * Find grayordinates with low mean
+## ** Make a copy of the imported bold data
+bold_m <- bold_t <- bold # m for the mean values; t for the thresholded values
+bthresh <- 0.1 # Threshold
+
+## ** Generate mean and trhesholded images
+# (i.e., the mean grayordinate value)
+for (struc in c("cortex_left", "cortex_right", "subcort")) {
+
+  ## *** Mean
+  bold_m$data[[struc]] <- matrix(rowMeans(bold$data[[struc]]), ncol = 1)
+
+  ## *** Threshold mean
+  bold_t$data[[struc]] <-
+    matrix(as.numeric(bold_m$data[[struc]] < bthresh), ncol = 1)
+
+  ## *** Count and report back
+  print(paste0(
+    "Grayordinates in ", struc, " with low mean (<", bthresh, "): ",
+    sum(bold_t$data[[struc]])
+  ))
+}
+
+## ** Plot the low-mean locations
+ofile <- file.path(odir_d, paste0("low_mean_regions_t", bthresh, ".html"))
+
+## *** Add medial wall
+bold_t <- move_from_mwall(bold_t, value = 2)
+plot(bold_t, fname = ofile, color_mode = "qualitative",
+     colors = c("white", "red", "gray"))
+
+
 ## * Fit the model with BayesfMRI
 # This took 10 minutes with 10 cores.
 system.time(
@@ -245,7 +277,7 @@ system.time(
     TR = reptime,
     nuisance = nuisances,
     scrub = grepl(1, rowSums(spikes)),
-    scale_BOLD = "mean",
+    scale_BOLD = "mean", # Ensure that values are percent signal change
     surfL = "fs_LR",
     surfR = "fs_LR",
     hpf = .01,
@@ -254,7 +286,7 @@ system.time(
     ar_smooth = 0,
     Bayes = TRUE,
     verbose = 1,
-    meanTol = 1,
+    meanTol = 0.1,
     n_threads = 10
   ))
 
@@ -280,7 +312,7 @@ for (c in contrasts) {
 ## * Export results to cifti, gifti, and nifti files
 # Potentially, I could aslo use write_xifti2() for this.
 ## ** Export cifti file
-ofile_cii <- file.path(odir_b, paste0(sub, "_bglm_1st_level.dscalar.nii"))
+ofile_cii <- file.path(odir_b, paste0(subj, "_bglm_1st_level.dscalar.nii"))
 write_cifti(
     bglm$estimate_xii$Bayes$single_sess,
     cifti_fname = ofile_cii,
@@ -378,7 +410,7 @@ replace_NA_with_label <- function(xii, NA_value=-1, NA_label="NA", NA_color="#FF
 }
 
 ## ** Export cifti file
-ofile_cii <- file.path(odir_a, paste0(sub, "_bglm_1st_level.dlabel.nii"))
+ofile_cii <- file.path(odir_a, paste0(subj, "_bglm_1st_level.dlabel.nii"))
 write_cifti(
     replace_NA_with_label(act$activations_xii$single_sess),
     cifti_fname = ofile_cii,
