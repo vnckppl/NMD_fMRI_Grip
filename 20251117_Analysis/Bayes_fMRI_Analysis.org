@@ -280,7 +280,7 @@ subcortical_rois <- c(
 bold_m <- bold_t <- bold # m for the mean values; t for the thresholded values
 bthresh <- 0.1 # Threshold
 
-## ** Generate mean and trhesholded images
+## ** Generate mean and thresholded images
 # (i.e., the mean grayordinate value)
 for (struc in c("cortex_left", "cortex_right", "subcort")) {
 
