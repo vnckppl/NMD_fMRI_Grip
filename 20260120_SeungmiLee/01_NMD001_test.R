@@ -1,4 +1,4 @@
-#!/usr/bin/env Rscript
+#!/usr/bin/env Rscript SEUNGMI LEE FILE
 ## * Environment
 base <- "/datadisk/tmp/20251119_NMD_ClenchTask"
 subj <- "sub-NMD001"
