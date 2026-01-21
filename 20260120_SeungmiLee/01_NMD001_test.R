@@ -1,4 +1,7 @@
-#!/usr/bin/env Rscript SEUNGMI LEE FILE
+#!/usr/bin/env Rscript
+## * Notes
+# This is the file that Seungmi Lee is working on.
+
 ## * Environment
 base <- "/datadisk/tmp/20251119_NMD_ClenchTask"
 subj <- "sub-NMD001"
