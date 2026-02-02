@@ -3,10 +3,10 @@
 # This is the file that Seungmi Lee is working on.
 
 ## * Environment
-base <- "/datadisk/tmp/20251119_NMD_ClenchTask"
+base <- "/Users/seungmi/Projects/NMD"
 subj <- "sub-NMD001"
 idir <- file.path(base, "data")
-odir <- file.path(base, "2025111_1stlevel_test", subj)
+odir <- file.path(base, "20260130_1stlevel_test", subj)
 dir.create(odir, showWarnings = FALSE, recursive = TRUE)
 
 ## ** Folder for design related files
@@ -24,7 +24,7 @@ dir.create(odir_a, showWarnings = FALSE, recursive = TRUE)
 library(INLA)
 library(ciftiTools)
 ciftiTools.setOption(
-  "wb_path", "/home/vincent/Software/workbench/2.1.0/bin_linux64"
+  "wb_path", "/Applications/workbench 3/bin_macosxub"
 )
 library(BayesfMRI)
 library(hrf)
@@ -85,6 +85,8 @@ crosshair <- data.frame(
   duration = rep(15, 7),
   idk = rep(1, 7)
 )
+# The duration of the first cross-hair was only 10s, not 15s.
+crosshair$duration[1] <- 10
 
 ## ** Combine into list
 events <- list(clench = clench, crosshair = crosshair)
