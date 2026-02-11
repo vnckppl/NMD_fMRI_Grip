@@ -1,6 +1,9 @@
 #!/usr/bin/env Rscript
 ## * Notes
 # This is the file that Seungmi Lee is working on.
+## * Purpose
+# First-level fMRI analysis for hand dominance task using Bayesian GLM
+# Compares hand clenching vs. crosshair fixation
 
 ## * Environment
 base <- "/Users/seungmi/Projects/NMD"
@@ -70,7 +73,7 @@ plot_spm_design <- function(spikes, nuisances, filename) {
   return(p)
 }
 
-
+# alternating 30s task blocks and 15s rest periods
 ## * Setup design matrix
 ## ** Timings and duration for hand clenching
 clench <- data.frame(
@@ -273,6 +276,12 @@ plot(bold_t, fname = ofile, color_mode = "qualitative",
 
 ## * Fit the model with BayesfMRI
 # This took 10 minutes with 10 cores.
+## * Fit the model with BayesfMRI
+# Key parameters:
+# - ar_order = 3: autoregressive model of order 3 for temporal correlation
+# - meanTol = 0.1: exclude grayordinates with mean BOLD < 0.1
+# - n_threads = 10: parallel processing with 10 cores (~10 min runtime)
+# - scale_BOLD = "mean": convert to percent signal change
 system.time(
   bglm <- BayesGLM(
     BOLD = bold,
