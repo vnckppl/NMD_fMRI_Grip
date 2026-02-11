@@ -123,6 +123,8 @@ crosshair <- data.frame(
   duration = rep(15, 7),
   idk = rep(1, 7)
 )
+## *** The first duration is 10 seconds, not 15, fix this.
+crosshair$duration[1] <- 10
 
 ## ** Combine into list
 events <- list(clench = clench, crosshair = crosshair)
@@ -241,17 +243,23 @@ plot_design(plotdata, method = "lineplot")
 
 ## * Build contrast
 # We are not interested in average activation during a condition, but in
-# in the contarst 'squeeze' vs. 'crosshair'. Create this design here.
+# in the contarst 'clench' vs. 'crosshair'. Create this design here.
 ## ** Backup the old design
-design_main_effects <- design
+design_bkp <- design
 
 ## ** Create contrasts
-# We are going to contrast the clenc and crosshair columns and store these in
+# We are going to contrast the clench and crosshair columns and store these in
 # the design object. The code calculates a model for both positive and negative
-# values, so no need to calculate two contrasts.
+# values, so no need to calculate two contrasts. In other words:
+# 1) I create a column for Clench: the design convoluted with the HRF
+# 2) I create a column for Rest (crosshair): the design convoluted with the HRF
+# 3) I subtract these columns (this results in both positive + negative values)
+# 4) Now you can estimate how well this signal predicts brain activation at each
+#    region. If it predicts very well for all subjects, it will be significant.
+#    - If it is a positive prediction: CL > rest.
+#    - If it is a negative prediction: CL < rest.
 contrasts <- c("CL_gt_CH")
-design$design[, 1] <-
-    (design_main_effects$design[, 1] - design_main_effects$design[, 2]) * 0.5
+design$design[, 1] <- (design_bkp$design[, 1] - design_bkp$design[, 2])
 # Remove the second column (or actually, just keep only the first)
 design$design <- design$design[, 1, drop = FALSE]
 colnames(design$design) <- contrasts
@@ -580,6 +588,8 @@ crosshair <- data.frame(
   duration = rep(15, 7),
   idk = rep(1, 7)
 )
+## *** The first duration is 10 seconds, not 15, fix this.
+crosshair$duration[1] <- 10
 
 ## ** Combine into list
 events <- list(clench = clench, crosshair = crosshair)
