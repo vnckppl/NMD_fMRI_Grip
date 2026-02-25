@@ -6,10 +6,10 @@
 # Compares hand clenching vs. crosshair fixation
 
 ## * Environment
-base <- "/Users/seungmi/Projects/NMD"
+base <- "/home/rstudio/projects/NMD"
 subj <- "sub-NMD001"
 idir <- file.path(base, "data")
-odir <- file.path(base, "20260130_1stlevel_test", subj)
+odir <- file.path(base, "output/20260130_1stlevel_test", subj)
 dir.create(odir, showWarnings = FALSE, recursive = TRUE)
 
 ## ** Folder for design related files
@@ -27,7 +27,7 @@ dir.create(odir_a, showWarnings = FALSE, recursive = TRUE)
 library(INLA)
 library(ciftiTools)
 ciftiTools.setOption(
-  "wb_path", "/Applications/workbench 3/bin_macosxub"
+  "wb_path", "/opt/workbench/workbench/bin_linux64"
 )
 library(BayesfMRI)
 library(hrf)
