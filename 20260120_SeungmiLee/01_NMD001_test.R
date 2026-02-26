@@ -5,11 +5,18 @@
 # First-level fMRI analysis for hand dominant task using Bayesian GLM
 # Compares hand clenching vs. crosshair fixation
 
+# * Install
+# R ARM from: https://cran.rstudio.com/
+# Rstudio form: https://posit.co/download/rstudio-desktop/
+# HCP Workbench from: https://www.humanconnectome.org/software/get-connectome-workbench
+# INLA from: https://www.r-inla.org/download-install, via: install.packages("INLA",repos=c(getOption("repos"),INLA="https://inla.r-inla-download.org/R/stable"), dep=TRUE)
+# R packages via CRAN: BayesfMRI, ciftiTools, hrf, ggplot2
+
 ## * Environment
-base <- "/home/rstudio/projects/NMD"
+base <- "/Users/u1478302/Library/CloudStorage/Box-Box/Seungmi Lee UROP"
 subj <- "sub-NMD001"
 idir <- file.path(base, "data")
-odir <- file.path(base, "output/20260130_1stlevel_test", subj)
+odir <- file.path(base, "output/20260225_1stlevel_test", subj)
 dir.create(odir, showWarnings = FALSE, recursive = TRUE)
 
 ## ** Folder for design related files
@@ -27,11 +34,17 @@ dir.create(odir_a, showWarnings = FALSE, recursive = TRUE)
 library(INLA)
 library(ciftiTools)
 ciftiTools.setOption(
-  "wb_path", "/opt/workbench/workbench/bin_linux64"
+  "wb_path", "/Applications/wb_view.app/Contents/usr/bin"
 )
 library(BayesfMRI)
 library(hrf)
 library(ggplot2)
+
+
+## * Set RGL headless
+options(rgl.useNULL = TRUE)
+Sys.setenv(RGL_USE_NULL = TRUE)
+library(rgl)
 
 
 ## * Function for design plot SPM-style with rotated x-axis labels
