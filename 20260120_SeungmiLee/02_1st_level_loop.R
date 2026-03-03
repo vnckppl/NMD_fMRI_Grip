@@ -1,16 +1,17 @@
 #!/usr/bin/env Rscript
+options(rgl.useNULL = TRUE)
+
 ## * Environment
-base <- "/datadisk/tmp/20251119_NMD_ClenchTask"
+base <- "/Users/u1478302/Library/CloudStorage/Box-Box/Seungmi Lee UROP"
 idir <- file.path(base, "data")
 odir <- file.path(base, "20251123_1stlevel")
 dir.create(odir, showWarnings = FALSE, recursive = TRUE)
-
 
 ## * Libraries
 library(INLA)
 library(ciftiTools)
 ciftiTools.setOption(
-  "wb_path", "/home/vincent/Software/workbench/2.1.0/bin_linux64"
+  "wb_path", "/Applications/wb_view.app/Contents/usr/bin"
 )
 library(BayesfMRI)
 library(hrf)
@@ -104,7 +105,7 @@ crosshair <- data.frame(
 )
 
 ## ** Combine into list
-events <- list(clench = clench, crosshair = crosshair)
+#events <- list(clench = clench, crosshair = crosshair)
 
 
 ## * List all input files
@@ -114,10 +115,13 @@ subs <- gsub(paste0(idir, "/"), "", files) |> substr(1, 10)
 
 ## * Loop over subjects
 for (sub in subs) {
+#first, check if it runs well with one subject. And then head to Loop over subjects
 #for (sub in "sub-NMD001") {
+#sub76 has 199s time-which crashed with the previous version. If this version crashes, you can rerun sub76 only after.
+#for (sub in c("sub-NMD076")) {
 
   ## ** Announce
-  vkr::h2(paste("Working on:", sub))
+  print(paste("Working on:", sub))
 
   ## ** Environment
   ## *** Folder for design related files
@@ -149,7 +153,8 @@ for (sub in subs) {
   )
 
   ## **** Subset regressor data frame
-  nuisances <- regressors[, reg_cols]
+  keep <- intersect(reg_cols, colnames(regressors))
+  nuisances <- regressors[, keep, drop = FALSE]
 
   ## **** Save output file
   write.table(
@@ -165,7 +170,7 @@ for (sub in subs) {
   )
 
   ## **** Subset regressor data frame
-  spikes <- regressors[, spike_cols]
+  spikes <- regressors[, spike_cols, drop = FALSE]
 
   ## **** Remove duplicates
   # In some cases, the steady-state outliers and the motion outliers may be the
@@ -195,7 +200,26 @@ for (sub in subs) {
      resamp_res = 10000))
   (reptime <- bold$meta$cifti$time_step)
   (vols <- ncol(bold))
-
+  
+  # Subject-specific event trimming (prevents BayesGLM crash)
+  # Why: some subjects have shorter runs (fewer volumes), so later events
+  # fall outside the available time and can become NA / missing.
+  # We trim events to be within [0, run_end].
+  # We stop if invalid.
+  run_end <- reptime * vols  # total scan duration in seconds
+  
+  clench2 <- clench[clench$start + clench$duration <= run_end, , drop = FALSE]
+  crosshair2 <- crosshair[crosshair$start + crosshair$duration <= run_end, , drop = FALSE]
+  
+  if (nrow(clench2) == 0 || nrow(crosshair2) == 0) {
+    stop(paste0(
+      "Design invalid for ", sub,
+      ": after trimming, one condition has 0 events. ",
+      "TR=", reptime, ", vols=", vols, ", run_end=", run_end
+    ))
+  }
+  
+  events <- list(clench = clench2, crosshair = crosshair2)
 
   ## ** Build design
   # We can optionally set dHRF = 1 to include the temporal derivative of the

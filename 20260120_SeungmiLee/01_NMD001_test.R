@@ -2,7 +2,7 @@
 ## * Notes
 # This is the file that Seungmi Lee is working on.
 ## * Purpose
-# First-level fMRI analysis for hand dominant task using Bayesian GLM
+# First-level fMRI analysis for hand dominance task using Bayesian GLM
 # Compares hand clenching vs. crosshair fixation
 
 # * Install
